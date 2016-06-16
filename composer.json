@@ -1,0 +1,21 @@
+{
+    "name": "rekcufniarb/http",
+    "description": "Simple cURL wrapper class.",
+    "type": "library",
+    "require": {
+        "php": ">=5.6",
+        "ext-curl": "*"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "rekcuFniarB",
+            "email": "retratserif@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "": "src/"
+        }
+    }
+}
