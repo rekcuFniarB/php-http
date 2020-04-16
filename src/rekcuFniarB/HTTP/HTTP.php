@@ -23,6 +23,7 @@ class HTTP {
         
         // Possible http error list
         $this->errors = array(
+            200 => 'OK',
             301 => 'Moved permanently',
             400 => 'Bad request',
             401 => 'Unauthorized',
@@ -67,8 +68,10 @@ class HTTP {
      * Get last http response code
      * @return int
      */
-    public function http_code()
+    public function http_code($code = null)
     {
+        if ($code !== null)
+            $this->last_response_code = (int) $code;
         return $this->last_response_code;
     }
     
@@ -100,19 +103,17 @@ class HTTP {
         elseif ($method == 'POST')
         {
             curl_setopt($this->descriptor, CURLOPT_POSTFIELDS, $data);
+            curl_setopt($this->descriptor, CURLOPT_POST, TRUE);
         }
         
         curl_setopt($this->descriptor, CURLOPT_URL, $url);
         
         $response = curl_exec($this->descriptor);
         
-        $this->last_response_code = (int) curl_getinfo($this->descriptor, CURLINFO_HTTP_CODE);
-        $code = $this->http_code();
+        $this->http_code( curl_getinfo($this->descriptor, CURLINFO_HTTP_CODE) );
         
-        if ($code == 200 || $code == 204)
-            return $response;
-        else
-            return $this->error($code, $response);
+        
+        return $response;
     } // query()
     
     /**
@@ -124,13 +125,27 @@ class HTTP {
     } // close()
     
     /**
-     * Show last error message
+     * Show error message
      */
-    public function error()
+    public function error($code = null, $message = null)
     {
-        if (isset($this->errors[$this->last_response_code]))
-            return("[{$this->last_response_code}] {$this->errors[$this->last_response_code]}");
-        else
-            return("[{$this->last_response_code}] Unknown error.");
+        if ($code === null)
+            $code = $this->last_response_code;
+        
+        if ($code < 400) {
+            return false;
+        }
+        
+        if ($message === null) {
+            if (isset($this->errors[$code]))
+                $message = "[$code] {$this->errors[$code]}";
+            else
+                $message = "[$code] Unknown error.";
+        }
+        else {
+            $message = "[$code] $message";
+        }
+        
+        return array('code' => $code, 'message' => $message);
     } // error()
 }
